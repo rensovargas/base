@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Name That Emoji</title>
+  <title>Name That Emoji!</title>
   <style>
     * {
       box-sizing: border-box;
@@ -23,8 +23,8 @@
 
     .game {
       text-align: center;
-      padding: 2rem;
-      max-width: 480px;
+      padding: 1.5rem;
+      max-width: 500px;
       width: 100%;
     }
 
@@ -32,32 +32,86 @@
       font-size: 2rem;
       margin-bottom: 0.25rem;
       color: #f0c040;
-      letter-spacing: 0.04em;
     }
 
     .subtitle {
+      font-size: 1rem;
+      color: #aaa;
+      margin-bottom: 1.5rem;
+    }
+
+    .settings {
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .settings label {
       font-size: 0.95rem;
       color: #aaa;
-      margin-bottom: 2rem;
+    }
+
+    .time-value {
+      font-weight: 700;
+      color: #f0c040;
+      min-width: 2.5ch;
+      display: inline-block;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 8px;
+      background: #2a2a4a;
+      border-radius: 4px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f0c040;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #f0c040;
+      border: none;
+      cursor: pointer;
     }
 
     .card {
       background: #16213e;
-      border-radius: 20px;
-      padding: 2.5rem 2rem;
-      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+      border-radius: 24px;
+      padding: 2rem 1.5rem;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     }
 
     .emoji-display {
-      font-size: 8rem;
+      font-size: 7rem;
       line-height: 1;
-      margin-bottom: 1.5rem;
-      transition: transform 0.3s ease;
+      margin-bottom: 1.25rem;
       user-select: none;
+      transition: transform 0.3s;
     }
 
-    .emoji-display.reveal {
-      transform: scale(1.1);
+    .emoji-display.bounce {
+      animation: bounce 0.5s ease;
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.15); }
     }
 
     /* Timer ring */
@@ -65,7 +119,7 @@
       position: relative;
       width: 72px;
       height: 72px;
-      margin: 0 auto 1.5rem;
+      margin: 0 auto 1.25rem;
     }
 
     .timer-svg {
@@ -98,7 +152,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.4rem;
+      font-size: 1.5rem;
       font-weight: bold;
       color: #f0c040;
     }
@@ -107,177 +161,134 @@
       color: #e74c3c;
     }
 
-    .guess-area {
+    /* Letter tiles */
+    .letters {
       display: flex;
-      gap: 0.5rem;
+      justify-content: center;
+      gap: 6px;
+      flex-wrap: wrap;
+      margin-bottom: 1.5rem;
+      min-height: 60px;
+    }
+
+    .tile {
+      width: 44px;
+      height: 52px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      font-weight: 800;
+      text-transform: uppercase;
+      transition: all 0.35s ease;
+      background: #2a2a4a;
+      color: transparent;
+      border: 3px solid #3a3a5a;
+    }
+
+    .tile.revealed {
+      background: #f0c040;
+      color: #1a1a2e;
+      border-color: #f0c040;
+      animation: pop 0.35s ease;
+    }
+
+    .tile.all-revealed {
+      background: #2ecc71;
+      color: #fff;
+      border-color: #2ecc71;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.2); }
+      100% { transform: scale(1); }
+    }
+
+    .answer-label {
+      font-size: 1.3rem;
+      color: #ccc;
+      margin-bottom: 1rem;
+      display: none;
+    }
+
+    .answer-label span {
+      color: #fff;
+      font-weight: 700;
+    }
+
+    .hint {
+      font-size: 0.85rem;
+      color: #666;
       margin-bottom: 1rem;
     }
 
-    .guess-input {
-      flex: 1;
-      padding: 0.75rem 1rem;
-      border-radius: 10px;
-      border: 2px solid #2a2a4a;
-      background: #0f3460;
-      color: #fff;
-      font-size: 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-    }
-
-    .guess-input:focus {
-      border-color: #f0c040;
-    }
-
-    .guess-input:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-
     .btn {
-      padding: 0.75rem 1.25rem;
-      border-radius: 10px;
+      padding: 0.9rem 1.5rem;
+      border-radius: 14px;
       border: none;
-      font-size: 1rem;
-      font-weight: 600;
+      font-size: 1.15rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.1s;
+      transition: transform 0.1s;
+      width: 100%;
     }
 
     .btn:active {
       transform: scale(0.97);
     }
 
-    .btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-
-    .btn-submit {
+    .btn-know {
       background: #f0c040;
       color: #1a1a2e;
+      font-size: 1.3rem;
     }
 
     .btn-reset {
       background: #0f3460;
       color: #fff;
-      border: 2px solid #f0c040;
-      width: 100%;
+      border: 3px solid #f0c040;
       margin-top: 0.75rem;
-      font-size: 1rem;
-      padding: 0.8rem;
-    }
-
-    .result {
-      margin-top: 1.25rem;
-      padding: 1rem;
-      border-radius: 12px;
-      font-size: 1rem;
-      font-weight: 500;
       display: none;
     }
 
-    .result.correct {
+    .result {
+      margin: 1rem 0;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 600;
+      display: none;
+    }
+
+    .result.guessed {
       background: #1a4a2e;
       border: 2px solid #2ecc71;
       color: #2ecc71;
     }
 
-    .result.wrong {
-      background: #4a1a1a;
-      border: 2px solid #e74c3c;
-      color: #e74c3c;
-    }
-
-    .result.timeout {
+    .result.revealed {
       background: #2a2a1a;
       border: 2px solid #f0c040;
       color: #f0c040;
-    }
-
-    .emoji-name {
-      margin-top: 0.5rem;
-      font-size: 1.1rem;
-      color: #ccc;
-      display: none;
-    }
-
-    .emoji-name span {
-      color: #fff;
-      font-weight: 700;
-    }
-
-    .hint {
-      font-size: 0.8rem;
-      color: #666;
-      margin-top: 0.5rem;
-    }
-
-    .settings {
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.75rem;
-    }
-
-    .settings label {
-      font-size: 0.9rem;
-      color: #aaa;
-    }
-
-    .settings .time-value {
-      font-weight: 700;
-      color: #f0c040;
-      min-width: 2.5ch;
-      display: inline-block;
-      text-align: center;
-    }
-
-    input[type="range"] {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 140px;
-      height: 6px;
-      background: #2a2a4a;
-      border-radius: 3px;
-      outline: none;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-webkit-slider-thumb {
-      -webkit-appearance: none;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #f0c040;
-      cursor: pointer;
-    }
-
-    input[type="range"]::-moz-range-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: #f0c040;
-      border: none;
-      cursor: pointer;
     }
   </style>
 </head>
 <body>
   <div class="game">
-    <h1>Name That Emoji</h1>
-    <p class="subtitle">Guess the emotion before time runs out!</p>
+    <h1>Name That Emoji!</h1>
+    <p class="subtitle">Can you guess the feeling?</p>
 
     <div class="settings" id="settings">
-        <label>Timer: <span class="time-value" id="timeValue">10s</span></label>
-        <input type="range" id="timeSlider" min="10" max="30" step="10" value="10" />
-      </div>
+      <label>Timer: <span class="time-value" id="timeValue">10s</span></label>
+      <input type="range" id="timeSlider" min="10" max="30" step="10" value="10" />
+    </div>
 
     <div class="card">
-      <div class="emoji-display" id="emojiDisplay">😀</div>
+      <div class="emoji-display" id="emojiDisplay"></div>
 
-      <div class="timer-wrap" id="timerWrap">
+      <div class="timer-wrap">
         <svg class="timer-svg" width="72" height="72" viewBox="0 0 72 72">
           <circle class="timer-bg" cx="36" cy="36" r="30" />
           <circle class="timer-arc" id="timerArc" cx="36" cy="36" r="30" />
@@ -285,129 +296,114 @@
         <div class="timer-text" id="timerText">10</div>
       </div>
 
-      <div class="guess-area">
-        <input
-          class="guess-input"
-          id="guessInput"
-          type="text"
-          placeholder="Type your guess..."
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-        />
-        <button class="btn btn-submit" id="submitBtn">Go</button>
-      </div>
+      <div class="letters" id="letters"></div>
 
-      <p class="hint" id="hint">Name the emotion (e.g. happy, sad, angry…)</p>
+      <p class="hint" id="hint">Read the letters as they appear!</p>
 
       <div class="result" id="result"></div>
-      <div class="emoji-name" id="emojiName">It was: <span id="emojiNameText"></span></div>
+      <p class="answer-label" id="answerLabel">The answer is: <span id="answerText"></span></p>
 
-      <button class="btn btn-reset" id="resetBtn" style="display:none">Next Emoji ➜</button>
+      <button class="btn btn-know" id="knowBtn">I Know It!</button>
+      <button class="btn btn-reset" id="resetBtn">Next Emoji</button>
     </div>
   </div>
 
   <script>
     const EMOJIS = [
-      { emoji: '😀', name: 'Grinning Face', keywords: ['happy', 'grinning', 'smile', 'grin', 'joy'] },
-      { emoji: '😃', name: 'Grinning Face with Big Eyes', keywords: ['happy', 'grinning', 'smile', 'excited', 'joy'] },
-      { emoji: '😄', name: 'Grinning Face with Smiling Eyes', keywords: ['happy', 'smile', 'grin', 'joy', 'cheerful'] },
-      { emoji: '😁', name: 'Beaming Face with Smiling Eyes', keywords: ['happy', 'grin', 'beaming', 'joyful', 'excited'] },
-      { emoji: '😆', name: 'Grinning Squinting Face', keywords: ['laughing', 'lol', 'haha', 'funny', 'happy', 'joy'] },
-      { emoji: '😅', name: 'Grinning Face with Sweat', keywords: ['nervous', 'relieved', 'sweat', 'awkward', 'phew'] },
-      { emoji: '😂', name: 'Face with Tears of Joy', keywords: ['laughing', 'lol', 'crying', 'funny', 'tears', 'haha'] },
-      { emoji: '🤣', name: 'Rolling on the Floor Laughing', keywords: ['laughing', 'rofl', 'lol', 'funny', 'hilarious'] },
-      { emoji: '😊', name: 'Smiling Face with Smiling Eyes', keywords: ['happy', 'smile', 'blush', 'sweet', 'warm'] },
-      { emoji: '😇', name: 'Smiling Face with Halo', keywords: ['innocent', 'angel', 'halo', 'good', 'pure'] },
-      { emoji: '🙂', name: 'Slightly Smiling Face', keywords: ['smile', 'happy', 'content', 'pleased'] },
-      { emoji: '🙃', name: 'Upside-Down Face', keywords: ['sarcastic', 'silly', 'ironic', 'playful', 'weird'] },
-      { emoji: '😉', name: 'Winking Face', keywords: ['wink', 'flirty', 'playful', 'joking', 'cheeky'] },
-      { emoji: '😌', name: 'Relieved Face', keywords: ['relieved', 'calm', 'peaceful', 'content', 'relaxed'] },
-      { emoji: '😍', name: 'Smiling Face with Heart-Eyes', keywords: ['love', 'heart eyes', 'adore', 'crush', 'infatuated'] },
-      { emoji: '🥰', name: 'Smiling Face with Hearts', keywords: ['love', 'hearts', 'adore', 'affection', 'smitten'] },
-      { emoji: '😘', name: 'Face Blowing a Kiss', keywords: ['kiss', 'blowing kiss', 'love', 'mwah', 'flirty'] },
-      { emoji: '😋', name: 'Face Savoring Food', keywords: ['yummy', 'delicious', 'hungry', 'tasty', 'nom'] },
-      { emoji: '😛', name: 'Face with Tongue', keywords: ['tongue', 'silly', 'playful', 'teasing'] },
-      { emoji: '😜', name: 'Winking Face with Tongue', keywords: ['tongue', 'wink', 'silly', 'crazy', 'playful', 'goofy'] },
-      { emoji: '🤪', name: 'Zany Face', keywords: ['crazy', 'zany', 'wild', 'silly', 'goofy', 'wacky'] },
-      { emoji: '🤨', name: 'Face with Raised Eyebrow', keywords: ['suspicious', 'skeptical', 'raised eyebrow', 'dubious', 'questioning'] },
-      { emoji: '🧐', name: 'Face with Monocle', keywords: ['monocle', 'curious', 'thinking', 'investigating', 'thoughtful'] },
-      { emoji: '🤓', name: 'Nerd Face', keywords: ['nerd', 'geek', 'smart', 'glasses', 'studious'] },
-      { emoji: '😎', name: 'Smiling Face with Sunglasses', keywords: ['cool', 'sunglasses', 'awesome', 'swag', 'confident'] },
-      { emoji: '🤩', name: 'Star-Struck', keywords: ['starstruck', 'star eyes', 'amazed', 'excited', 'wow', 'impressed'] },
-      { emoji: '🥳', name: 'Partying Face', keywords: ['party', 'celebrate', 'birthday', 'fun', 'festive'] },
-      { emoji: '😏', name: 'Smirking Face', keywords: ['smirk', 'smug', 'sly', 'flirty', 'suggestive'] },
-      { emoji: '😒', name: 'Unamused Face', keywords: ['unamused', 'unimpressed', 'bored', 'annoyed', 'meh'] },
-      { emoji: '😞', name: 'Disappointed Face', keywords: ['disappointed', 'sad', 'let down', 'upset'] },
-      { emoji: '😔', name: 'Pensive Face', keywords: ['pensive', 'sad', 'thoughtful', 'melancholy', 'gloomy'] },
-      { emoji: '😟', name: 'Worried Face', keywords: ['worried', 'anxious', 'concerned', 'nervous', 'uneasy'] },
-      { emoji: '😕', name: 'Confused Face', keywords: ['confused', 'puzzled', 'unsure', 'uncertain'] },
-      { emoji: '🙁', name: 'Slightly Frowning Face', keywords: ['sad', 'frown', 'unhappy', 'disappointed'] },
-      { emoji: '😣', name: 'Persevering Face', keywords: ['persevering', 'struggling', 'determined', 'pain', 'exhausted'] },
-      { emoji: '😖', name: 'Confounded Face', keywords: ['confounded', 'frustrated', 'distressed', 'exasperated'] },
-      { emoji: '😫', name: 'Tired Face', keywords: ['tired', 'exhausted', 'weary', 'burnt out'] },
-      { emoji: '😩', name: 'Weary Face', keywords: ['weary', 'tired', 'fed up', 'exhausted', 'done'] },
-      { emoji: '🥺', name: 'Pleading Face', keywords: ['pleading', 'puppy eyes', 'begging', 'adorable', 'cute', 'sad'] },
-      { emoji: '😢', name: 'Crying Face', keywords: ['crying', 'sad', 'tears', 'upset', 'weeping'] },
-      { emoji: '😭', name: 'Loudly Crying Face', keywords: ['crying', 'sobbing', 'bawling', 'devastated', 'sad'] },
-      { emoji: '😤', name: 'Face with Steam from Nose', keywords: ['frustrated', 'angry', 'huffing', 'determined', 'triumph'] },
-      { emoji: '😠', name: 'Angry Face', keywords: ['angry', 'mad', 'irritated', 'furious', 'annoyed'] },
-      { emoji: '😡', name: 'Pouting Face', keywords: ['angry', 'furious', 'enraged', 'pouting', 'red face'] },
-      { emoji: '🤬', name: 'Face with Symbols on Mouth', keywords: ['cursing', 'swearing', 'angry', 'furious', 'rage'] },
-      { emoji: '😈', name: 'Smiling Face with Horns', keywords: ['devil', 'evil', 'mischievous', 'naughty', 'villain'] },
-      { emoji: '😮', name: 'Face with Open Mouth', keywords: ['surprised', 'shocked', 'wow', 'open mouth', 'amazed'] },
-      { emoji: '😯', name: 'Hushed Face', keywords: ['hushed', 'surprised', 'shocked', 'quiet', 'speechless'] },
-      { emoji: '😲', name: 'Astonished Face', keywords: ['astonished', 'shocked', 'amazed', 'surprised', 'wow'] },
-      { emoji: '😳', name: 'Flushed Face', keywords: ['flushed', 'embarrassed', 'shocked', 'blushing', 'caught'] },
-      { emoji: '🥵', name: 'Hot Face', keywords: ['hot', 'sweating', 'overheated', 'burning', 'fever'] },
-      { emoji: '🥶', name: 'Cold Face', keywords: ['cold', 'freezing', 'chilly', 'icy', 'frozen'] },
-      { emoji: '😱', name: 'Face Screaming in Fear', keywords: ['screaming', 'scared', 'horrified', 'terrified', 'fear', 'shocked'] },
-      { emoji: '😨', name: 'Fearful Face', keywords: ['fearful', 'scared', 'afraid', 'frightened', 'anxious'] },
-      { emoji: '😰', name: 'Anxious Face with Sweat', keywords: ['anxious', 'nervous', 'worried', 'scared', 'sweating'] },
-      { emoji: '😥', name: 'Sad but Relieved Face', keywords: ['sad', 'relieved', 'disappointed', 'worried'] },
-      { emoji: '😓', name: 'Downcast Face with Sweat', keywords: ['downcast', 'sad', 'tired', 'struggling', 'sweat'] },
-      { emoji: '🤗', name: 'Smiling Face with Open Hands', keywords: ['hug', 'warm', 'friendly', 'welcoming', 'open arms'] },
-      { emoji: '🤔', name: 'Thinking Face', keywords: ['thinking', 'hmm', 'pondering', 'curious', 'wondering'] },
-      { emoji: '🤥', name: 'Lying Face', keywords: ['lying', 'pinocchio', 'dishonest', 'fibbing', 'liar'] },
-      { emoji: '😶', name: 'Face Without Mouth', keywords: ['speechless', 'silent', 'no mouth', 'shocked', 'mute'] },
-      { emoji: '😐', name: 'Neutral Face', keywords: ['neutral', 'blank', 'expressionless', 'meh', 'indifferent'] },
-      { emoji: '😑', name: 'Expressionless Face', keywords: ['expressionless', 'blank', 'deadpan', 'unamused', 'indifferent'] },
-      { emoji: '😬', name: 'Grimacing Face', keywords: ['grimace', 'awkward', 'cringe', 'uncomfortable', 'yikes'] },
-      { emoji: '🙄', name: 'Face with Rolling Eyes', keywords: ['eye roll', 'rolling eyes', 'annoyed', 'exasperated', 'whatever'] },
-      { emoji: '😯', name: 'Hushed Face', keywords: ['hushed', 'surprised', 'awed', 'silent'] },
-      { emoji: '😦', name: 'Frowning Face with Open Mouth', keywords: ['frowning', 'shocked', 'dismayed', 'worried', 'appalled'] },
-      { emoji: '😧', name: 'Anguished Face', keywords: ['anguished', 'distressed', 'horrified', 'pained', 'upset'] },
-      { emoji: '🥱', name: 'Yawning Face', keywords: ['yawning', 'tired', 'bored', 'sleepy', 'exhausted'] },
-      { emoji: '😴', name: 'Sleeping Face', keywords: ['sleeping', 'asleep', 'tired', 'zzz', 'snooze'] },
-      { emoji: '😵', name: 'Dizzy Face', keywords: ['dizzy', 'confused', 'dazed', 'spinning', 'disoriented'] },
-      { emoji: '🤐', name: 'Zipper-Mouth Face', keywords: ['zipper mouth', 'silent', 'secret', 'quiet', 'shush'] },
-      { emoji: '🥴', name: 'Woozy Face', keywords: ['woozy', 'drunk', 'dizzy', 'tipsy', 'dazed'] },
-      { emoji: '🤢', name: 'Nauseated Face', keywords: ['nauseated', 'sick', 'disgusted', 'nausea', 'queasy'] },
-      { emoji: '🤮', name: 'Face Vomiting', keywords: ['vomiting', 'sick', 'gross', 'disgusted', 'nausea'] },
-      { emoji: '🤧', name: 'Sneezing Face', keywords: ['sneezing', 'sick', 'cold', 'allergies', 'achoo'] },
-      { emoji: '😷', name: 'Face with Medical Mask', keywords: ['sick', 'mask', 'ill', 'covid', 'medical'] },
-      { emoji: '🤒', name: 'Face with Thermometer', keywords: ['sick', 'fever', 'ill', 'thermometer', 'unwell'] },
-      { emoji: '🤕', name: 'Face with Head-Bandage', keywords: ['hurt', 'injured', 'bandage', 'pain', 'accident'] },
+      { emoji: '😀', word: 'happy' },
+      { emoji: '😃', word: 'happy' },
+      { emoji: '😄', word: 'glad' },
+      { emoji: '😁', word: 'happy' },
+      { emoji: '😆', word: 'funny' },
+      { emoji: '😅', word: 'oops' },
+      { emoji: '😂', word: 'funny' },
+      { emoji: '🤣', word: 'funny' },
+      { emoji: '😊', word: 'nice' },
+      { emoji: '😇', word: 'good' },
+      { emoji: '🙂', word: 'calm' },
+      { emoji: '🙃', word: 'silly' },
+      { emoji: '😉', word: 'wink' },
+      { emoji: '😌', word: 'calm' },
+      { emoji: '😍', word: 'love' },
+      { emoji: '🥰', word: 'love' },
+      { emoji: '😘', word: 'kiss' },
+      { emoji: '😋', word: 'yummy' },
+      { emoji: '😛', word: 'silly' },
+      { emoji: '😜', word: 'goofy' },
+      { emoji: '🤪', word: 'crazy' },
+      { emoji: '🤨', word: 'hmm' },
+      { emoji: '🧐', word: 'smart' },
+      { emoji: '🤓', word: 'nerd' },
+      { emoji: '😎', word: 'cool' },
+      { emoji: '🤩', word: 'wow' },
+      { emoji: '🥳', word: 'party' },
+      { emoji: '😏', word: 'sly' },
+      { emoji: '😒', word: 'bored' },
+      { emoji: '😞', word: 'sad' },
+      { emoji: '😔', word: 'sad' },
+      { emoji: '😟', word: 'worry' },
+      { emoji: '😕', word: 'lost' },
+      { emoji: '🙁', word: 'sad' },
+      { emoji: '😣', word: 'tough' },
+      { emoji: '😖', word: 'upset' },
+      { emoji: '😫', word: 'tired' },
+      { emoji: '😩', word: 'tired' },
+      { emoji: '🥺', word: 'please' },
+      { emoji: '😢', word: 'cry' },
+      { emoji: '😭', word: 'cry' },
+      { emoji: '😤', word: 'mad' },
+      { emoji: '😠', word: 'angry' },
+      { emoji: '😡', word: 'angry' },
+      { emoji: '🤬', word: 'angry' },
+      { emoji: '😈', word: 'bad' },
+      { emoji: '😮', word: 'oh' },
+      { emoji: '😲', word: 'shock' },
+      { emoji: '😳', word: 'shy' },
+      { emoji: '🥵', word: 'hot' },
+      { emoji: '🥶', word: 'cold' },
+      { emoji: '😱', word: 'scary' },
+      { emoji: '😨', word: 'afraid' },
+      { emoji: '😰', word: 'worry' },
+      { emoji: '🤗', word: 'hug' },
+      { emoji: '🤔', word: 'think' },
+      { emoji: '🤫', word: 'shh' },
+      { emoji: '🤥', word: 'lie' },
+      { emoji: '😶', word: 'quiet' },
+      { emoji: '😐', word: 'meh' },
+      { emoji: '😬', word: 'yikes' },
+      { emoji: '🙄', word: 'ugh' },
+      { emoji: '🥱', word: 'sleepy' },
+      { emoji: '😴', word: 'sleep' },
+      { emoji: '😵', word: 'dizzy' },
+      { emoji: '🤢', word: 'sick' },
+      { emoji: '🤮', word: 'sick' },
+      { emoji: '🤧', word: 'achoo' },
+      { emoji: '😷', word: 'sick' },
+      { emoji: '🤒', word: 'fever' },
+      { emoji: '🤕', word: 'hurt' },
     ];
 
-    const CIRCUMFERENCE = 2 * Math.PI * 30; // ~188.5
+    const CIRCUMFERENCE = 2 * Math.PI * 30;
 
     let currentEmoji = null;
     let gameDuration = 10;
     let timeLeft = gameDuration;
     let timerInterval = null;
+    let revealInterval = null;
     let gameOver = false;
     let usedIndices = [];
+    let revealOrder = [];
+    let revealedCount = 0;
 
     const emojiDisplay = document.getElementById('emojiDisplay');
     const timerArc = document.getElementById('timerArc');
     const timerText = document.getElementById('timerText');
-    const guessInput = document.getElementById('guessInput');
-    const submitBtn = document.getElementById('submitBtn');
-    const result = document.getElementById('result');
-    const emojiName = document.getElementById('emojiName');
-    const emojiNameText = document.getElementById('emojiNameText');
+    const lettersEl = document.getElementById('letters');
+    const knowBtn = document.getElementById('knowBtn');
     const resetBtn = document.getElementById('resetBtn');
+    const result = document.getElementById('result');
+    const answerLabel = document.getElementById('answerLabel');
+    const answerText = document.getElementById('answerText');
     const hint = document.getElementById('hint');
     const timeSlider = document.getElementById('timeSlider');
     const timeValue = document.getElementById('timeValue');
@@ -427,6 +423,42 @@
       return EMOJIS[idx];
     }
 
+    function buildTiles(word) {
+      lettersEl.innerHTML = '';
+      for (let i = 0; i < word.length; i++) {
+        const tile = document.createElement('div');
+        tile.className = 'tile';
+        tile.textContent = word[i];
+        tile.dataset.index = i;
+        lettersEl.appendChild(tile);
+      }
+    }
+
+    function shuffleRevealOrder(len) {
+      // Reveal first letter immediately, then random order for the rest
+      const indices = [];
+      for (let i = 1; i < len; i++) indices.push(i);
+      for (let i = indices.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [indices[i], indices[j]] = [indices[j], indices[i]];
+      }
+      return [0, ...indices];
+    }
+
+    function revealLetter(index) {
+      const tiles = lettersEl.querySelectorAll('.tile');
+      if (tiles[index]) {
+        tiles[index].classList.add('revealed');
+      }
+    }
+
+    function revealAll() {
+      const tiles = lettersEl.querySelectorAll('.tile');
+      tiles.forEach(t => {
+        t.classList.add('revealed', 'all-revealed');
+      });
+    }
+
     function updateTimer() {
       const fraction = timeLeft / gameDuration;
       timerArc.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
@@ -439,54 +471,60 @@
     function startTimer() {
       timeLeft = gameDuration;
       updateTimer();
+
+      const word = currentEmoji.word;
+      revealOrder = shuffleRevealOrder(word.length);
+      revealedCount = 0;
+
+      // Reveal first letter right away
+      revealLetter(revealOrder[0]);
+      revealedCount = 1;
+
+      // Schedule remaining letters evenly across the timer
+      const remaining = revealOrder.length - 1;
+      if (remaining > 0) {
+        const intervalMs = (gameDuration * 1000) / (remaining + 1);
+        revealInterval = setInterval(() => {
+          if (revealedCount < revealOrder.length) {
+            revealLetter(revealOrder[revealedCount]);
+            revealedCount++;
+          }
+        }, intervalMs);
+      }
+
       timerInterval = setInterval(() => {
         timeLeft--;
         updateTimer();
         if (timeLeft <= 0) {
           clearInterval(timerInterval);
+          clearInterval(revealInterval);
           endGame('timeout');
         }
       }, 1000);
     }
 
-    function normalize(str) {
-      return str.trim().toLowerCase().replace(/[^a-z\s]/g, '');
-    }
-
-    function checkGuess(guess) {
-      const g = normalize(guess);
-      if (!g) return false;
-      const name = normalize(currentEmoji.name);
-      if (name.includes(g) || g.includes(name.split(' ')[0])) return true;
-      return currentEmoji.keywords.some(k => {
-        const kn = normalize(k);
-        return kn === g || kn.includes(g) || g.includes(kn);
-      });
-    }
-
-    function endGame(reason, guess = '') {
+    function endGame(reason) {
       gameOver = true;
       clearInterval(timerInterval);
-      guessInput.disabled = true;
-      submitBtn.disabled = true;
-      hint.style.display = 'none';
+      clearInterval(revealInterval);
 
-      emojiDisplay.classList.add('reveal');
-      emojiName.style.display = 'block';
-      emojiNameText.textContent = currentEmoji.name;
+      revealAll();
+      knowBtn.style.display = 'none';
+      hint.style.display = 'none';
       resetBtn.style.display = 'block';
       settings.style.display = 'flex';
+      answerLabel.style.display = 'block';
+      answerText.textContent = currentEmoji.word;
+
+      emojiDisplay.classList.add('bounce');
 
       result.style.display = 'block';
-      if (reason === 'correct') {
-        result.className = 'result correct';
-        result.textContent = '✓ Correct! Well done!';
-      } else if (reason === 'wrong') {
-        result.className = 'result wrong';
-        result.textContent = `✗ Not quite — you guessed "${guess}"`;
+      if (reason === 'guessed') {
+        result.className = 'result guessed';
+        result.textContent = 'Great job! You got it!';
       } else {
-        result.className = 'result timeout';
-        result.textContent = "⏰ Time's up!";
+        result.className = 'result revealed';
+        result.textContent = 'Time is up! The word is shown above.';
       }
     }
 
@@ -495,36 +533,26 @@
       gameOver = false;
 
       emojiDisplay.textContent = currentEmoji.emoji;
-      emojiDisplay.classList.remove('reveal');
-      guessInput.value = '';
-      guessInput.disabled = false;
-      submitBtn.disabled = false;
-      result.style.display = 'none';
-      emojiName.style.display = 'none';
+      emojiDisplay.classList.remove('bounce');
+      buildTiles(currentEmoji.word);
+
+      knowBtn.style.display = 'block';
       resetBtn.style.display = 'none';
+      result.style.display = 'none';
+      answerLabel.style.display = 'none';
       hint.style.display = 'block';
+      settings.style.display = 'none';
 
       timerArc.style.strokeDashoffset = 0;
       timerArc.classList.remove('urgent');
       timerText.classList.remove('urgent');
 
-      settings.style.display = 'none';
-      guessInput.focus();
       startTimer();
     }
 
-    submitBtn.addEventListener('click', () => {
+    knowBtn.addEventListener('click', () => {
       if (gameOver) return;
-      const guess = guessInput.value;
-      if (checkGuess(guess)) {
-        endGame('correct');
-      } else {
-        endGame('wrong', guess);
-      }
-    });
-
-    guessInput.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') submitBtn.click();
+      endGame('guessed');
     });
 
     resetBtn.addEventListener('click', startGame);
