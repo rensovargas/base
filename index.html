@@ -212,12 +212,67 @@
       color: #666;
       margin-top: 0.5rem;
     }
+
+    .settings {
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .settings label {
+      font-size: 0.9rem;
+      color: #aaa;
+    }
+
+    .settings .time-value {
+      font-weight: 700;
+      color: #f0c040;
+      min-width: 2.5ch;
+      display: inline-block;
+      text-align: center;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 140px;
+      height: 6px;
+      background: #2a2a4a;
+      border-radius: 3px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f0c040;
+      cursor: pointer;
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: #f0c040;
+      border: none;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div class="game">
     <h1>Name That Emoji</h1>
     <p class="subtitle">Guess the emotion before time runs out!</p>
+
+    <div class="settings" id="settings">
+        <label>Timer: <span class="time-value" id="timeValue">10s</span></label>
+        <input type="range" id="timeSlider" min="10" max="30" step="10" value="10" />
+      </div>
 
     <div class="card">
       <div class="emoji-display" id="emojiDisplay">😀</div>
@@ -338,7 +393,8 @@
     const CIRCUMFERENCE = 2 * Math.PI * 30; // ~188.5
 
     let currentEmoji = null;
-    let timeLeft = 10;
+    let gameDuration = 10;
+    let timeLeft = gameDuration;
     let timerInterval = null;
     let gameOver = false;
     let usedIndices = [];
@@ -353,6 +409,14 @@
     const emojiNameText = document.getElementById('emojiNameText');
     const resetBtn = document.getElementById('resetBtn');
     const hint = document.getElementById('hint');
+    const timeSlider = document.getElementById('timeSlider');
+    const timeValue = document.getElementById('timeValue');
+    const settings = document.getElementById('settings');
+
+    timeSlider.addEventListener('input', () => {
+      gameDuration = parseInt(timeSlider.value);
+      timeValue.textContent = gameDuration + 's';
+    });
 
     function pickRandom() {
       if (usedIndices.length === EMOJIS.length) usedIndices = [];
@@ -364,7 +428,7 @@
     }
 
     function updateTimer() {
-      const fraction = timeLeft / 10;
+      const fraction = timeLeft / gameDuration;
       timerArc.style.strokeDashoffset = CIRCUMFERENCE * (1 - fraction);
       timerText.textContent = timeLeft;
       const urgent = timeLeft <= 3;
@@ -373,7 +437,7 @@
     }
 
     function startTimer() {
-      timeLeft = 10;
+      timeLeft = gameDuration;
       updateTimer();
       timerInterval = setInterval(() => {
         timeLeft--;
@@ -411,6 +475,7 @@
       emojiName.style.display = 'block';
       emojiNameText.textContent = currentEmoji.name;
       resetBtn.style.display = 'block';
+      settings.style.display = 'flex';
 
       result.style.display = 'block';
       if (reason === 'correct') {
@@ -443,6 +508,7 @@
       timerArc.classList.remove('urgent');
       timerText.classList.remove('urgent');
 
+      settings.style.display = 'none';
       guessInput.focus();
       startTimer();
     }
